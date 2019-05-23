@@ -33,6 +33,7 @@ void print_prompt(State_t *state) {
 /// Print the user in the specific format
 ///
 void print_user(User_t *user, SelectArgs_t *sel_args) {
+    if(sel_args->fields_len == 0) return;
     size_t idx;
     printf("(");
     for (idx = 0; idx < sel_args->fields_len; idx++) {
@@ -54,6 +55,49 @@ void print_user(User_t *user, SelectArgs_t *sel_args) {
     }
     printf(")\n");
 }
+void print_aggre(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
+    if (cmd->aggre_args.fields_len == 0) return;
+    size_t idx;
+    int limit = cmd->cmd_args.sel_args.limit;
+    int offset = cmd->cmd_args.sel_args.offset;
+    // printf("%d\n", cmd->aggre_args.fields_len);
+    if (offset == -1) {
+        offset = 0;
+    }
+    printf("(");
+    for (idx = offset; idx < cmd->aggre_args.fields_len; idx++) {
+        if (limit != -1 && (idx - offset) >= limit) {
+            break;
+        }
+        if (idx > offset) printf(", ");
+        if (!strncmp(cmd->aggre_args.type[idx], "count", 5)) {
+            printf("%zu", idxListLen);
+        } else if (!strncmp(cmd->aggre_args.type[idx], "avg", 3)) {
+            double sum = 0;
+            for (int i = 0; i < idxListLen; i++) {
+                User_t *user = get_User(table, idxList[i]);
+                if (!strncmp(cmd->aggre_args.fields[idx], "id", 2)) {
+                    sum += user->id;
+                } else if (!strncmp(cmd->aggre_args.fields[idx], "age", 3)) {
+                    sum += user->age;
+                }
+            }
+            printf("%.3lf", sum / idxListLen);
+        } else if (!strncmp(cmd->aggre_args.type[idx], "sum", 3)) {
+            int sum = 0;
+            for (int i = 0; i < idxListLen; i++) {
+                User_t *user = get_User(table, idxList[i]);
+                if (!strncmp(cmd->aggre_args.fields[idx], "id", 2)) {
+                    sum += user->id;
+                } else if (!strncmp(cmd->aggre_args.fields[idx], "age", 3)) {
+                    sum += user->age;
+                }
+            }
+            printf("%d", sum);
+        }
+    }
+    printf(")\n");
+}
 
 ///
 /// Print the users for given offset and limit restriction
@@ -66,21 +110,11 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     if (offset == -1) {
         offset = 0;
     }
-
-    if (idxList) {
-        for (idx = offset; idx < idxListLen; idx++) {
-            if (limit != -1 && (idx - offset) >= limit) {
-                break;
-            }
-            print_user(get_User(table, idxList[idx]), &(cmd->cmd_args.sel_args));
+    for (idx = offset; idx < idxListLen; idx++) {
+        if (limit != -1 && (idx - offset) >= limit) {
+            break;
         }
-    } else {
-        for (idx = offset; idx < table->len; idx++) {
-            if (limit != -1 && (idx - offset) >= limit) {
-                break;
-            }
-            print_user(get_User(table, idx), &(cmd->cmd_args.sel_args));
-        }
+        print_user(get_User(table, idxList[idx]), &(cmd->cmd_args.sel_args));
     }
 }
 
@@ -108,6 +142,140 @@ int parse_input(char *input, Command_t *cmd) {
 /// Handle built-in commands
 /// Return: command type
 ///
+
+
+Pair_t where_users(Table_t *table, Command_t *cmd) {
+    WhereArgs_t wArgs = cmd->whe_args;
+    int fields_len = wArgs.fields_len;
+    int *idxList = NULL;
+    int listLen = 0;
+    Pair_t p;
+    if (fields_len >= 1) {
+        for (int i = 0, j, cnt; i < table->len; i++) {
+            User_t *user = get_User(table, i);
+            cnt = 0;
+            for (j = 0; j < fields_len; j++) {
+                if (!strncmp(wArgs.conditions[j], "\"", 1)) {
+                    if (!strncmp(wArgs.fields[j], "name", 4)) {
+                        if (!strncmp(wArgs.operators[j], "=", 1)) {
+                            if(!strncmp(user->name, wArgs.conditions[j], strlen(wArgs.conditions[j]))) cnt++;
+                        }else if(!strncmp(wArgs.operators[j], "!=", 2)) {
+                            if(strncmp(user->name, wArgs.conditions[j], strlen(wArgs.conditions[j]))) cnt++;
+                        }
+                    } else if (!strncmp(wArgs.fields[j], "email", 5)) {
+                        if (!strncmp(wArgs.operators[j], "=", 1)) {
+                            if(!strncmp(user->email, wArgs.conditions[j], strlen(wArgs.conditions[j]))) cnt++;
+                        }else if(!strncmp(wArgs.operators[j], "!=", 2)) {
+                            if(strncmp(user->email, wArgs.conditions[j], strlen(wArgs.conditions[j]))) cnt++;
+                        }
+                    }
+                } else {
+                    double num = atof(wArgs.conditions[j]);
+                    if (!strncmp(wArgs.fields[j], "id", 2)) {
+                        if(!strncmp(wArgs.operators[j], "=", 1)) {
+                            if(user->id == num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "!=", 2)) {
+                            if(user->id != num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], ">=", 2)) {
+                            if(user->id >= num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "<=", 2)) {
+                            if(user->id <= num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], ">", 1)) {
+                            if(user->id > num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "<", 1)) {
+                            if(user->id < num) cnt++;
+                        } 
+                    } else if (!strncmp(wArgs.fields[j], "age", 3)) {
+                        if(!strncmp(wArgs.operators[j], "=", 1)) {
+                            if(user->age == num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "!=", 2)) {
+                            if(user->age != num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], ">=", 2)) {
+                            if( user->age >= num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "<=", 2)) {
+                            if(user->age <= num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], ">", 1)) {
+                            if(user->age > num) cnt++;
+                        } else if (!strncmp(wArgs.operators[j], "<", 1)) {
+                            if(user->age < num) cnt++;
+                        } 
+                    }
+                }
+            }
+            if (wArgs.A == 1) {
+                if (cnt == fields_len) {
+                    int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                    if (idxList) {
+                        memcpy(buf, idxList, sizeof(int)*listLen);
+                        free(idxList);
+                    }
+                    idxList = buf;
+                    idxList[listLen] = i;
+                    listLen++;
+                }
+            } else {
+                if (cnt >= 1) {
+                    int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                    if (idxList) {
+                        memcpy(buf, idxList, sizeof(int)*listLen);
+                        free(idxList);
+                    }
+                    idxList = buf;
+                    idxList[listLen] = i;
+                    listLen++;
+                }
+            }
+        }
+    } else {
+        int *buf = (int *)malloc(sizeof(int)*table->len);
+        listLen = table->len;
+        idxList = buf;
+        for (int i = 0; i < table->len; i++) {
+            idxList[i] = i;
+        }
+    }
+    p.idxList = idxList;
+    p.listLen = listLen;
+
+    return p;
+    
+}
+void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
+    UpdateArgs_t uArgs = cmd->up_args;
+    for (int i = 0; i < idxListLen; i++) {
+        User_t *user = get_User(table, idxList[i]);
+        if(!strncmp(uArgs.fields, "name", 4)) {
+            strcpy(user->name, uArgs.dest);
+        } else if (!strncmp(uArgs.fields, "email", 5)) {
+            strcpy(user->email, uArgs.dest);
+        } else if (!strncmp(uArgs.fields, "id", 2)) {
+            user->id = atoi(uArgs.dest);
+        } else if (!strncmp(uArgs.fields, "age", 3)) {
+            user->age = atoi(uArgs.dest);
+        }
+    }
+    return;
+}
+void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
+    Table_t *newTable = new_Table(NULL);
+    for (int i = 0, cnt = 0; i < table->len; i++) {
+        cnt = 0;
+        for (int j = 0; j < idxListLen; j++) {
+            if (i == idxList[j]) cnt = 1; 
+        }
+        if (!cnt) {
+            add_User(newTable, get_User(table, i));
+        }
+    }
+    
+    table->len = newTable->len;
+    for (int i = 0; i < table->len; i++) {
+        table->users[i].id = newTable->users[i].id;
+        memcpy(table->users[i].name, newTable->users[i].name, sizeof(newTable->users[i].name));
+        memcpy(table->users[i].email, newTable->users[i].email, sizeof(newTable->users[i].email));
+        table->users[i].age = newTable->users[i].age;
+    }
+}
 void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
     if (!strncmp(cmd->args[0], ".exit", 5)) {
         archive_table(table);
@@ -147,16 +315,32 @@ int handle_query_cmd(Table_t *table, Command_t *cmd) {
     } else if (!strncmp(cmd->args[0], "select", 6)) {
         handle_select_cmd(table, cmd);
         return SELECT_CMD;
+    } else if (!strncmp(cmd->args[0], "update", 6)) {
+        handle_update_cmd(table, cmd);
+        return UPDATE_CMD;
+    } else if (!strncmp(cmd->args[0], "delete", 6)) {
+        handle_delete_cmd(table, cmd);
+        return DELETE_CMD;
     } else {
         return UNRECOG_CMD;
     }
 }
+int handle_update_cmd(Table_t *table, Command_t *cmd) {
+    cmd->type = UPDATE_CMD;
+    update_state_handler(cmd, 1);
+    Pair_t p = where_users(table, cmd);
+    updater(table, p.idxList, p.listLen, cmd);
+    return table->len;
+}
 
-///
-/// The return value is the number of rows insert into table
-/// If the insert operation success, then change the input arg
-/// `cmd->type` to INSERT_CMD
-///
+int handle_delete_cmd(Table_t *table, Command_t *cmd) {
+    cmd->type = DELETE_CMD;
+    delete_state_handler(cmd, 1);
+    Pair_t p = where_users(table, cmd);
+    deleter(table, p.idxList, p.listLen, cmd);
+    return table->len;
+}
+
 int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     int ret = 0;
     User_t *user = command_to_User(cmd);
@@ -169,19 +353,14 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     return ret;
 }
 
-///
-/// The return value is the number of rows select from table
-/// If the select operation success, then change the input arg
-/// `cmd->type` to SELECT_CMD
-///
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(cmd, 1);
-
-    print_users(table, NULL, 0, cmd);
+    Pair_t p = where_users(table, cmd);
+    print_users(table, p.idxList, p.listLen, cmd);
+    print_aggre(table, p.idxList, p.listLen, cmd);
     return table->len;
 }
-
 ///
 /// Show the help messages
 ///
@@ -226,4 +405,5 @@ void print_help_msg() {
     "\n";
     printf("%s", msg);
 }
+
 

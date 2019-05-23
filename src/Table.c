@@ -131,7 +131,6 @@ int load_table(Table_t *table, char *file_name) {
     }
     return table->len;
 }
-
 ///
 /// Return the user in table by the given index
 ///

@@ -53,6 +53,7 @@ void field_state_handler(Command_t *cmd, size_t arg_idx) {
     cmd->aggre_args.type = NULL;
     cmd->aggre_args.fields_len = 0;
     while(arg_idx < cmd->args_len) {
+        // printf("1\n");
         if (!strncmp(cmd->args[arg_idx], "*", 1)) {
             add_select_field(cmd, cmd->args[arg_idx]);
         } else if (!strncmp(cmd->args[arg_idx], "count", 5) || !strncmp(cmd->args[arg_idx], "avg", 3) || !strncmp(cmd->args[arg_idx], "sum", 3)) {
@@ -79,8 +80,9 @@ void field_state_handler(Command_t *cmd, size_t arg_idx) {
 }
 void where_state_handler(Command_t *cmd, size_t arg_idx) {
     if (arg_idx < cmd->args_len) {
+        // printf("2\n");
         add_where_field(cmd, cmd->args[arg_idx], cmd->args[arg_idx+1], cmd->args[arg_idx+2]);
-
+        // printf("2\n");
         arg_idx += 3;
         if (arg_idx == cmd->args_len) {
             return;
@@ -112,7 +114,6 @@ void table_state_handler(Command_t *cmd, size_t arg_idx) {
 
             return;
         } else if (!strncmp(cmd->args[arg_idx], "where", 5)) {
-
             where_state_handler(cmd, arg_idx+1);
             return;
         } else if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
@@ -147,6 +148,7 @@ void offset_state_handler(Command_t *cmd, size_t arg_idx) {
 }
 
 void limit_state_handler(Command_t *cmd, size_t arg_idx) {
+    // printf("2\n");
     if (arg_idx < cmd->args_len) {
         cmd->cmd_args.sel_args.limit = atoi(cmd->args[arg_idx]);
 

@@ -110,6 +110,7 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     if (offset == -1) {
         offset = 0;
     }
+    // printf("%d\n", limit);
     for (idx = offset; idx < idxListLen; idx++) {
         if (limit != -1 && (idx - offset) >= limit) {
             break;

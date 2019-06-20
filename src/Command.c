@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "Command.h"
 
@@ -54,6 +55,7 @@ int add_Arg(Command_t *cmd, const char *arg) {
         cmd->args_cap += 5;
     }
     cmd->args[cmd->args_len] = strdup(arg);
+    // printf("%s ", cmd->args[cmd->args_len]);
     cmd->args_len++;
     return 0;
 

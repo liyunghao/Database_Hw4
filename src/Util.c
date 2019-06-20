@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include "Util.h"
+#include "Like.h"
 #include "Command.h"
 #include "Table.h"
 #include "SelectState.h"
@@ -351,14 +352,19 @@ int handle_delete_cmd(Table_t *table, Command_t *cmd) {
 
 int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     int ret = 0;
-    User_t *user = command_to_User(cmd);
-    if (user) {
-        ret = add_User(table, user);
-        if (ret > 0) {
-            cmd->type = INSERT_CMD;
+    if (strncmp(cmd->args[1], "into", 4)) return ret;
+    if (!strncmp(cmd->args[2], "user", 4)) {
+        User_t *user = command_to_User(cmd);
+        if (user) {
+            ret = add_User(table, user);
+            if (ret > 0) {
+                cmd->type = INSERT_CMD;
+            }
         }
+    } else if (!strncmp(cmd->args[2], "like", 4)) {
+        Like_t *like = command_to_Like(cmd);
     }
-    return ret;
+    
 }
 
 int handle_select_cmd(Table_t *table, Command_t *cmd) {

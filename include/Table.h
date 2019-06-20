@@ -3,14 +3,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "User.h"
+#include "Like.h"
 
 #define INIT_TABLE_SIZE 10000
 #define EXT_LEN 500
 
 typedef struct Table {
     size_t capacity;
-    size_t len;
+    size_t user_len;
+    size_t like_len;
     User_t *users;
+    Like_t *likes;
     unsigned char *cache_map;
     FILE *fp;
     char *file_name;

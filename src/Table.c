@@ -11,9 +11,12 @@ Table_t *new_Table(char *file_name) {
     Table_t *table = (Table_t*)malloc(sizeof(Table_t));
     memset((void*)table, 0, sizeof(Table_t));
     table->capacity = INIT_TABLE_SIZE;
-    table->len = 0;
+    table->user_len = 0;
+    table->like_len = 0;
     table->users = (User_t*)malloc(
                             sizeof(User_t) * INIT_TABLE_SIZE);
+    table->likes = (Like_t*)malloc(
+                            sizeof(Like_t) * INIT_TABLE_SIZE);
     table->cache_map = (unsigned char*)malloc(sizeof(char)*INIT_TABLE_SIZE);
     memset(table->cache_map, 0, sizeof(char)*INIT_TABLE_SIZE);
     table->fp = NULL;
@@ -34,21 +37,20 @@ int add_User(Table_t *table, User_t *user) {
     if (!table || !user) {
         return 0;
     }
-    // Check id doesn't exist in the table
-    for (idx = 0; idx < table->len; idx++) {
+    for (idx = 0; idx < table->user_len; idx++) {
         usr_ptr = get_User(table, idx);
         if (usr_ptr->id == user->id) {
             return 0;
         }
     }
-    if (table->len == table->capacity) {
-        User_t *new_user_buf = (User_t*)malloc(sizeof(User_t)*(table->len+EXT_LEN));
-        unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->len+EXT_LEN));
+    if (table->user_len == table->capacity) {
+        User_t *new_user_buf = (User_t*)malloc(sizeof(User_t)*(table->user_len+EXT_LEN));
+        unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->user_len+EXT_LEN));
 
-        memcpy(new_user_buf, table->users, sizeof(User_t)*table->len);
+        memcpy(new_user_buf, table->users, sizeof(User_t)*table->user_len);
 
-        memset(new_cache_buf, 0, sizeof(unsigned char)*(table->len+EXT_LEN));
-        memcpy(new_cache_buf, table->cache_map, sizeof(unsigned char)*table->len);
+        memset(new_cache_buf, 0, sizeof(unsigned char)*(table->user_len+EXT_LEN));
+        memcpy(new_cache_buf, table->cache_map, sizeof(unsigned char)*table->user_len);
 
 
         free(table->users);
@@ -57,11 +59,16 @@ int add_User(Table_t *table, User_t *user) {
         table->cache_map = new_cache_buf;
         table->capacity += EXT_LEN;
     }
-    idx = table->len;
+    idx = table->user_len;
     memcpy((table->users)+idx, user, sizeof(User_t));
     table->cache_map[idx] = 1;
-    table->len++;
+    table->user_len++;
     return 1;
+}
+
+int add_like(Table_t *table, Like_t *like) {
+    size_t idx;
+    
 }
 
 ///

@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
         // print_prompt(state);
         read_input(input_buffer);
         cmd_type = parse_input(input_buffer->buffer, cmd);
+        
         if (cmd_type == BUILT_IN_CMD) {
             handle_builtin_cmd(table, cmd, state);
         } else if (cmd_type == QUERY_CMD) {

@@ -42,10 +42,10 @@ def execute_testsuite(exe, suite_path, suite_out_path, suite_ans_path):
             p.stdin.write(line.encode())
 
         p.stdin.close()
-        try:
-            p.wait(timeout=30)
-        except subprocess.TimeoutExpired:
-            print("Timeout")
+#        try:
+#        p.wait(timeout=30)
+#        except subprocess.TimeoutExpired:
+#            print("Timeout")
 
         if suite:
             suite.tearDown()

@@ -1,12 +1,5 @@
-<<<<<<< HEAD
 insert 1 "user1" "user1@example.com" 10
 insert 2 "user2" "user2@example.com" 20
 insert 3 "user3" "user3@example.com" 30
 select * from table where id <= 2
-=======
-insert into user 1 "user1" "user1@example.com" 10
-insert into user 2 "user2" "user2@example.com" 20
-insert into user 3 "user3" "user3@example.com" 30
-select * from user where id <= 2
->>>>>>> 22ad8468b67c49ed7b5749728349ff2de2d86ae2
 .exit

@@ -47,8 +47,8 @@ TEST(testCommand, testAddSelectArg) {
     size_t idx;
     for (idx = 0; idx < fields_len; idx++) {
         add_select_field(cmd, fields[idx]);
-        ASSERT_EQ(cmd->cmd_args.sel_args.fields_len, idx+1);
-        ASSERT_STREQ(cmd->cmd_args.sel_args.fields[idx], fields[idx]);
+        ASSERT_EQ(cmd->sel_args.fields_len, idx+1);
+        ASSERT_STREQ(cmd->sel_args.fields[idx], fields[idx]);
     }
 }
 

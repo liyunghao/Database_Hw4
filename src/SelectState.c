@@ -39,10 +39,10 @@ void delete_state_handler(Command_t *cmd, size_t arg_idx) {
     }
 }
 void field_state_handler(Command_t *cmd, size_t arg_idx) {
-    cmd->cmd_args.sel_args.fields = NULL;
-    cmd->cmd_args.sel_args.fields_len = 0;
-    cmd->cmd_args.sel_args.limit = -1;
-    cmd->cmd_args.sel_args.offset = -1;
+    cmd->sel_args.fields = NULL;
+    cmd->sel_args.fields_len = 0;
+    cmd->sel_args.limit = -1;
+    cmd->sel_args.offset = -1;
     cmd->whe_args.fields = NULL;
     cmd->whe_args.fields_len = 0;
     cmd->whe_args.operators = NULL;
@@ -80,9 +80,7 @@ void field_state_handler(Command_t *cmd, size_t arg_idx) {
 }
 void where_state_handler(Command_t *cmd, size_t arg_idx) {
     if (arg_idx < cmd->args_len) {
-        // printf("2\n");
         add_where_field(cmd, cmd->args[arg_idx], cmd->args[arg_idx+1], cmd->args[arg_idx+2]);
-        // printf("2\n");
         arg_idx += 3;
         if (arg_idx == cmd->args_len) {
             return;
@@ -120,6 +118,7 @@ void table_state_handler(Command_t *cmd, size_t arg_idx) {
             offset_state_handler(cmd, arg_idx+1);
             return;
         } else if (!strncmp(cmd->args[arg_idx], "limit", 5)) {
+            // printf("1\n")
             limit_state_handler(cmd, arg_idx+1);
             return;
         } 
@@ -130,7 +129,7 @@ void table_state_handler(Command_t *cmd, size_t arg_idx) {
 
 void offset_state_handler(Command_t *cmd, size_t arg_idx) {
     if (arg_idx < cmd->args_len) {
-        cmd->cmd_args.sel_args.offset = atoi(cmd->args[arg_idx]);
+        cmd->sel_args.offset = atoi(cmd->args[arg_idx]);
 
         arg_idx++;
 
@@ -148,9 +147,8 @@ void offset_state_handler(Command_t *cmd, size_t arg_idx) {
 }
 
 void limit_state_handler(Command_t *cmd, size_t arg_idx) {
-    // printf("2\n");
     if (arg_idx < cmd->args_len) {
-        cmd->cmd_args.sel_args.limit = atoi(cmd->args[arg_idx]);
+        cmd->sel_args.limit = atoi(cmd->args[arg_idx]);
 
         arg_idx++;
 

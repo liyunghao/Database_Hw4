@@ -56,16 +56,16 @@ void print_user(User_t *user, SelectArgs_t *sel_args) {
     printf(")\n");
 }
 void print_aggre(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
-    if (cmd->aggre_args.fields_len == 0) return;
     size_t idx;
-    int limit = cmd->cmd_args.sel_args.limit;
-    int offset = cmd->cmd_args.sel_args.offset;
-    // printf("%d\n", cmd->aggre_args.fields_len);
+    int limit = cmd->sel_args.limit;
+    int offset = cmd->sel_args.offset;
+    int len = cmd->aggre_args.fields_len;
+    if (len == 0 || offset >= len) return;
     if (offset == -1) {
         offset = 0;
     }
     printf("(");
-    for (idx = offset; idx < cmd->aggre_args.fields_len; idx++) {
+    for (idx = offset; idx < len; idx++) {
         if (limit != -1 && (idx - offset) >= limit) {
             break;
         }
@@ -104,8 +104,8 @@ void print_aggre(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
 ///
 void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     size_t idx;
-    int limit = cmd->cmd_args.sel_args.limit;
-    int offset = cmd->cmd_args.sel_args.offset;
+    int limit = cmd->sel_args.limit;
+    int offset = cmd->sel_args.offset;
 
     if (offset == -1) {
         offset = 0;
@@ -115,7 +115,7 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
         if (limit != -1 && (idx - offset) >= limit) {
             break;
         }
-        print_user(get_User(table, idxList[idx]), &(cmd->cmd_args.sel_args));
+        print_user(get_User(table, idxList[idx]), &(cmd->sel_args));
     }
 }
 
@@ -243,6 +243,13 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
 }
 void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     UpdateArgs_t uArgs = cmd->up_args;
+    for (int i = 0; i < idxListLen; i++) {
+        User_t *user = get_User(table, idxList[i]);
+        if(!strncmp(uArgs.fields, "id", 2)) {
+            if (user->id == atoi(uArgs.dest))
+                return;
+        }
+    }
     for (int i = 0; i < idxListLen; i++) {
         User_t *user = get_User(table, idxList[i]);
         if(!strncmp(uArgs.fields, "name", 4)) {

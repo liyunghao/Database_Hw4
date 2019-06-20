@@ -3,6 +3,7 @@
     "string.h": "c",
     "stdlib.h": "c",
     "locale": "c",
-    "string": "c"
+    "string": "c",
+    "iostream": "cpp"
   }
 }

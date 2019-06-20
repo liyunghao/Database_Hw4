@@ -1,12 +1,5 @@
-<<<<<<< HEAD
 insert 1 "user1" "user1@example.com" 10
 insert 2 "user2" "user2@example.com" 20
 update table set age = 22
 select * from table
-=======
-insert into user 1 "user1" "user1@example.com" 10
-insert into user 2 "user2" "user2@example.com" 20
-update user set age = 22
-select * from user
->>>>>>> 22ad8468b67c49ed7b5749728349ff2de2d86ae2
 .exit

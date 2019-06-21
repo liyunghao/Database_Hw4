@@ -68,6 +68,38 @@ int add_User(Table_t *table, User_t *user) {
 
 int add_Like(Table_t *table, Like_t *like) {
     size_t idx;
+    Like_t *like_ptr;
+
+    if (!table || !like) {
+        return 0;
+    }
+    for (idx = 0; idx < table->like_len; idx++) {
+        like_ptr = get_Like(table, idx);
+        if (like_ptr->id1 == like->id1) {       //id1 is primary key
+            return 0;
+        }
+    }
+    if (table->like_len == table->capacity) {
+        User_t *new_like_buf = (User_t*)malloc(sizeof(User_t)*(table->like_len+EXT_LEN));
+        unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->like_len+EXT_LEN));
+
+        memcpy(new_like_buf, table->likes, sizeof(User_t)*table->like_len);
+
+        memset(new_cache_buf, 0, sizeof(unsigned char)*(table->like_len+EXT_LEN));
+        memcpy(new_cache_buf, table->cache_map, sizeof(unsigned char)*table->like_len);
+
+
+        free(table->likes);
+        free(table->cache_map);
+        table->likes = new_like_buf;
+        table->cache_map = new_cache_buf;
+        table->capacity += EXT_LEN;
+    }
+    idx = table->like_len;
+    memcpy((table->likes)+idx, like, sizeof(User_t));
+    table->cache_map[idx] = 1;
+    table->like_len++;
+    return 1;
     
 }
 

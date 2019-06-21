@@ -69,9 +69,29 @@ execution command.
     ├─ include/           Header files
     ├─ src/               Source files
     │  ├─ shell.c         Entry point, which contains main()
-    │  └─ Util.c          Some utility functions
+    │  ├─ Util.c          Some utility functions
+    │  ├─ Table.c
+    │  ├─ SelectState.c   
+    │  ├─ User.c
+    │  ├─ Like.c
+    │  ├─ Util.c
+    │  ├─
     ├─ test/              Unit tests & system tests
     │  ├─ include/        Test header files
     │  ├─ system/         System tests
     │  └─ *.c             Unit tests source file
     └─ Makefile           Makefile for make
+
+
+## Done 
+1. update user set (SelectState.c - update_state_handler)
+2. delete from user (SelectState.c - delete_state_handler)
+3. archive table (Table.c - archive_like_table / archive_user_table)
+
+## On doing
+1. load table (Table.c - load_like_table / load_user_table)
+2. 
+
+
+## Todo
+1. 

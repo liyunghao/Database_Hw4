@@ -25,6 +25,7 @@ User_t* command_to_User(Command_t *cmd) {
     if (!user || !cmd) {
         return NULL;
     }
+    // printf("%d\n", cmd->args_len);
     if (cmd->args_len != 7) {
         return NULL;
     }

@@ -21,6 +21,7 @@ Command_t* new_Command() {
 
     cmd->type = UNRECOG_CMD;
     cmd->args = NULL;
+    cmd->table = 0;
     cmd->args_len = 0;
     cmd->args_cap = 0;
     return cmd;
@@ -66,6 +67,7 @@ error:
 ///
 /// Add select fields
 ///
+
 int add_select_field(Command_t *cmd, const char *argument) {
     size_t fields_len = cmd->sel_args.fields_len;
     char **buf = (char**)malloc(sizeof(char*) * (fields_len+1));

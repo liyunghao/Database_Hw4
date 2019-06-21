@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "Like.h"
 #include "Command.h"
 
@@ -18,6 +19,7 @@ Like_t* command_to_Like(Command_t *cmd) {
     if (cmd->args_len != 5) {
         return NULL;
     }
+    
     like->id1 = atoi(cmd->args[3]);
     like->id2 = atoi(cmd->args[4]);
     return like;

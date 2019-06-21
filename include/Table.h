@@ -9,19 +9,21 @@
 #define EXT_LEN 500
 
 typedef struct Table {
-    size_t capacity;
+    size_t user_capacity;
+    size_t like_capacity;
     size_t user_len;
     size_t like_len;
     User_t *users;
     Like_t *likes;
-    unsigned char *cache_map;
+    unsigned char *user_cache_map;
+    unsigned char *like_cache_map;
     FILE *fp;
     char *file_name;
 } Table_t;
 
 Table_t *new_Table(char *file_name);
 int add_User(Table_t *table, User_t *user);
-int add_Like(Table_t *table, Like_t *like)
+int add_Like(Table_t *table, Like_t *like);
 int archive_table(Table_t *table);
 int load_table(Table_t *table, char *file_name);
 User_t* get_User(Table_t *table, size_t idx);

@@ -40,7 +40,6 @@ int add_User(Table_t *table, User_t *user) {
     if (!table || !user) {
         return 0;
     }
-    // printf("3\n");
     for (idx = 0; idx < table->user_len; idx++) {
         usr_ptr = get_User(table, idx);
         if (usr_ptr->id == user->id) {
@@ -63,7 +62,6 @@ int add_User(Table_t *table, User_t *user) {
         table->user_cache_map = new_cache_buf;
         table->user_capacity += EXT_LEN;
     }
-    // printf("%zu", table->user_len);
     idx = table->user_len;
     memcpy((table->users)+idx, user, sizeof(User_t));
     table->user_cache_map[idx] = 1;

@@ -130,7 +130,6 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     if (offset == -1) {
         offset = 0;
     }
-    // printf("%d\n", limit);
     for (idx = offset; idx < idxListLen; idx++) {
         if (limit != -1 && (idx - offset) >= limit) {
             break;
@@ -146,9 +145,6 @@ void print_likes(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     if (offset == -1) {
         offset = 0;
     }
-    // printf("%d\n", limit);
-    // printf("%zu\n", idxListLen);
-    
     for (idx = offset; idx < idxListLen; idx++) {
         if (limit != -1 && (idx - offset) >= limit) {
             break;
@@ -470,10 +466,8 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
     if (strncmp(cmd->args[1], "into", 4)) return ret;
     if (!strncmp(cmd->args[2], "user", 4)) {
         User_t *user = command_to_User(cmd);
-        // printf("1\n");
         if (user) {
             ret = add_User(table, user);
-            // printf("2\n");
             if (ret > 0) {
                 cmd->type = INSERT_CMD;
             }
@@ -493,7 +487,6 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(cmd, 1);
-    // printf("%zu\n", table->user_len);
     if (!strncmp(cmd->table, "user", 4)) {
         Pair_t p = where_users(table, cmd);
         print_users(table, p.idxList, p.listLen, cmd);

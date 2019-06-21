@@ -104,9 +104,9 @@ int add_Like(Table_t *table, Like_t *like) {
 }
 
 ///
-/// Return value is the archived table len
+/// Return value is the archived user table len
 ///
-int archive_table(Table_t *table) {
+int archive_user_table(Table_t *table) {
     size_t archived_len;
     struct stat st;
 
@@ -119,14 +119,40 @@ int archive_table(Table_t *table) {
         archived_len = 0;
     }
     fwrite((void*)(table->users+archived_len), \
-            sizeof(User_t), table->len-archived_len, \
+            sizeof(User_t), table->user_len-archived_len, \
             table->fp);
 
     fclose(table->fp);
     free(table->file_name);
     table->fp = NULL;
     table->file_name = NULL;
-    return table->len;
+    return table->user_len;
+}
+
+///
+/// Return value is the archived like table len
+///
+int archive_like_table(Table_t *table) {
+    size_t archived_len;
+    struct stat st;
+
+    if (table->fp == NULL) {
+        return 0;
+    }
+    if (stat(table->file_name, &st) == 0) {
+        archived_len = st.st_size / sizeof(Like_t);
+    } else {
+        archived_len = 0;
+    }
+    fwrite((void*)(table->users+archived_len), \
+            sizeof(Like_t), table->like_len-archived_len, \
+            table->fp);
+
+    fclose(table->fp);
+    free(table->file_name);
+    table->fp = NULL;
+    table->file_name = NULL;
+    return table->like_len;
 }
 
 ///
@@ -134,7 +160,7 @@ int archive_table(Table_t *table) {
 /// only if the ``file_name`` is NULL
 /// Return: the number of records in the db file
 ///
-int load_table(Table_t *table, char *file_name) {
+int load_user_table(Table_t *table, char *file_name) {
     size_t archived_len;
     struct stat st;
     if (table->fp != NULL) {
@@ -144,7 +170,7 @@ int load_table(Table_t *table, char *file_name) {
         table->file_name = NULL;
     }
     if (file_name != NULL) {
-        table->len = 0;
+        table->user_len = 0;
         memset(table->cache_map, 0, sizeof(char)*INIT_TABLE_SIZE);
         if (stat(file_name, &st) != 0) {
             //Create new file
@@ -164,12 +190,55 @@ int load_table(Table_t *table, char *file_name) {
                 table->capacity = archived_len+EXT_LEN;
             }
             table->fp = fopen(file_name, "a+b");
-            table->len = archived_len;
+            table->user_len = archived_len;
         }
         table->file_name = strdup(file_name);
     }
-    return table->len;
+    return table->user_len;
 }
+
+///
+/// Loading the db file will overwrite the existed records in table,
+/// only if the ``file_name`` is NULL
+/// Return: the number of records in the db file
+///
+int load_like_table(Table_t *table, char *file_name) {
+    size_t archived_len;
+    struct stat st;
+    if (table->fp != NULL) {
+        fclose(table->fp);
+        free(table->file_name);
+        table->fp = NULL;
+        table->file_name = NULL;
+    }
+    if (file_name != NULL) {
+        table->like_len = 0;
+        memset(table->cache_map, 0, sizeof(char)*INIT_TABLE_SIZE);
+        if (stat(file_name, &st) != 0) {
+            //Create new file
+            table->fp = fopen(file_name, "wb");
+        } else {
+            archived_len = st.st_size / sizeof(User_t);
+            if (archived_len > table->capacity) {
+                User_t *new_like_buf = (User_t*)malloc(sizeof(User_t)*(archived_len+EXT_LEN));
+                unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(archived_len+EXT_LEN));
+
+                memset(new_cache_buf, 0, sizeof(unsigned char)*(archived_len+EXT_LEN));
+
+                free(table->likes);
+                free(table->cache_map);
+                table->likes = new_like_buf;
+                table->cache_map = new_cache_buf;
+                table->capacity = archived_len+EXT_LEN;
+            }
+            table->fp = fopen(file_name, "a+b");
+            table->like_len = archived_len;
+        }
+        table->file_name = strdup(file_name);
+    }
+    return table->like_len;
+}
+
 ///
 /// Return the user in table by the given index
 ///

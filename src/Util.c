@@ -265,6 +265,7 @@ void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     }
     return;
 }
+
 void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     Table_t *newTable = new_Table(NULL);
     for (int i = 0, cnt = 0; i < table->len; i++) {

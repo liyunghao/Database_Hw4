@@ -5,7 +5,7 @@
 #include "SelectState.h"
 
 void update_state_handler(Command_t *cmd, size_t arg_idx) {
-    if (!strncmp(cmd->args[arg_idx], "table", 5) && !strncmp(cmd->args[arg_idx+1], "set", 3)) {
+    if (!strncmp(cmd->args[arg_idx], "user", 5) && !strncmp(cmd->args[arg_idx+1], "set", 3)) {
         arg_idx += 2;
         cmd->up_args.fields = cmd->args[arg_idx];
         arg_idx += 2;
@@ -24,7 +24,7 @@ void update_state_handler(Command_t *cmd, size_t arg_idx) {
     }
 }
 void delete_state_handler(Command_t *cmd, size_t arg_idx) {
-    if (!strncmp(cmd->args[arg_idx], "from", 4) && !strncmp(cmd->args[arg_idx+1], "table", 5)) {
+    if (!strncmp(cmd->args[arg_idx], "from", 4) && !strncmp(cmd->args[arg_idx+1], "user", 5)) {
         arg_idx+=2;
         if (arg_idx < cmd->args_len) {
             if (!strncmp(cmd->args[arg_idx], "where", 5)) {

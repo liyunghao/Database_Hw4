@@ -66,7 +66,7 @@ int add_User(Table_t *table, User_t *user) {
     return 1;
 }
 
-int add_like(Table_t *table, Like_t *like) {
+int add_Like(Table_t *table, Like_t *like) {
     size_t idx;
     
 }
@@ -166,4 +166,37 @@ User_t* get_User(Table_t *table, size_t idx) {
 error:
     return NULL;
 }
+
+///
+/// Return the likes in table by the given index (not sure if it's right)
+///
+Like_t* get_Like(Table_t *table, size_t idx) {
+
+    size_t archived_len;
+    struct stat st;
+    if (!table->cache_map[idx]) {
+        if (idx > INIT_TABLE_SIZE) {
+            goto error;
+        }
+        if (stat(table->file_name, &st) != 0) {
+            goto error;
+        }
+        archived_len = st.st_size / sizeof(Like_t);
+        if (idx >= archived_len) {
+            //neither in file, nor in memory
+            goto error;
+        }
+
+        fseek(table->fp, idx*sizeof(Like_t), SEEK_SET);
+        fread(table->likes+idx, sizeof(Like_t), 1, table->fp);
+        table->cache_map[idx] = 1;
+    }
+    return table->likes+idx;
+    
+error:
+    return NULL;
+}
+
+
+
 

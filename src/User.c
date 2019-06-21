@@ -25,13 +25,13 @@ User_t* command_to_User(Command_t *cmd) {
     if (!user || !cmd) {
         return NULL;
     }
-    if (cmd->args_len != 6) {
+    if (cmd->args_len != 7) {
         return NULL;
     }
-    user->id = atoi(cmd->args[2]);
-    strncpy(user->name, cmd->args[3], MAX_USER_NAME);
-    strncpy(user->email, cmd->args[4], MAX_USER_EMAIL);
-    user->age = atoi(cmd->args[5]);
+    user->id = atoi(cmd->args[3]);
+    strncpy(user->name, cmd->args[4], MAX_USER_NAME);
+    strncpy(user->email, cmd->args[5], MAX_USER_EMAIL);
+    user->age = atoi(cmd->args[6]);
     return user;
 }
 

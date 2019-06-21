@@ -68,7 +68,37 @@ int add_User(Table_t *table, User_t *user) {
 
 int add_like(Table_t *table, Like_t *like) {
     size_t idx;
-    
+    Like_t *like_ptr;
+    if (!table || !like) {
+        return 0;
+    }
+    for (idx = 0; idx < table->user_len; idx++) {
+        usr_ptr = get_User(table, idx);
+        if (usr_ptr->id == user->id) {
+            return 0;
+        }
+    }
+    if (table->user_len == table->capacity) {
+        User_t *new_user_buf = (User_t*)malloc(sizeof(User_t)*(table->user_len+EXT_LEN));
+        unsigned char *new_cache_buf = (unsigned char *)malloc(sizeof(unsigned char)*(table->user_len+EXT_LEN));
+
+        memcpy(new_user_buf, table->users, sizeof(User_t)*table->user_len);
+
+        memset(new_cache_buf, 0, sizeof(unsigned char)*(table->user_len+EXT_LEN));
+        memcpy(new_cache_buf, table->cache_map, sizeof(unsigned char)*table->user_len);
+
+
+        free(table->users);
+        free(table->cache_map);
+        table->users = new_user_buf;
+        table->cache_map = new_cache_buf;
+        table->capacity += EXT_LEN;
+    }
+    idx = table->user_len;
+    memcpy((table->users)+idx, user, sizeof(User_t));
+    table->cache_map[idx] = 1;
+    table->user_len++;
+    return 1;
 }
 
 ///
@@ -86,8 +116,8 @@ int archive_table(Table_t *table) {
     } else {
         archived_len = 0;
     }
-    fwrite((void*)(table->users+archived_len), \
-            sizeof(User_t), table->len-archived_len, \
+    fwrite((void*)(table->users+archived_len), 
+            sizeof(User_t), table->len-archived_len, 
             table->fp);
 
     fclose(table->fp);

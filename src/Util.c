@@ -56,6 +56,25 @@ void print_user(User_t *user, SelectArgs_t *sel_args) {
     }
     printf(")\n");
 }
+void print_like(Like_t *like, SelectArgs_t *sel_args) {
+    if(sel_args->fields_len == 0) return;
+    size_t idx;
+    printf("(");
+    for (idx = 0; idx < sel_args->fields_len; idx++) {
+        if (!strncmp(sel_args->fields[idx], "*", 1)) {
+            printf("%u, %u", like->id1, like->id2);
+        } else {
+            if (idx > 0) printf(", ");
+
+            if (!strncmp(sel_args->fields[idx], "id1", 3)) {
+                printf("%u", like->id1);
+            } else if (!strncmp(sel_args->fields[idx], "id2", 3)) {
+                printf("%u", like->id2);
+            }
+        }
+    }
+    printf(")\n");
+}
 void print_aggre(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     size_t idx;
     int limit = cmd->sel_args.limit;
@@ -111,12 +130,26 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     if (offset == -1) {
         offset = 0;
     }
-    // printf("%d\n", limit);
     for (idx = offset; idx < idxListLen; idx++) {
         if (limit != -1 && (idx - offset) >= limit) {
             break;
         }
         print_user(get_User(table, idxList[idx]), &(cmd->sel_args));
+    }
+}
+void print_likes(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
+    size_t idx;
+    int limit = cmd->sel_args.limit;
+    int offset = cmd->sel_args.offset;
+
+    if (offset == -1) {
+        offset = 0;
+    }
+    for (idx = offset; idx < idxListLen; idx++) {
+        if (limit != -1 && (idx - offset) >= limit) {
+            break;
+        }
+        print_like(get_Like(table, idxList[idx]), &(cmd->sel_args));
     }
 }
 
@@ -144,8 +177,85 @@ int parse_input(char *input, Command_t *cmd) {
 /// Handle built-in commands
 /// Return: command type
 ///
+Pair_t where_likes(Table_t *table, Command_t *cmd) {
+    WhereArgs_t wArgs = cmd->whe_args;
+    int fields_len = wArgs.fields_len;
+    int *idxList = NULL;
+    int listLen = 0;
+    Pair_t p;
+    if (fields_len >= 1) {
+        for (int i = 0; i < table->like_len; i++) {
+            Like_t *like = get_Like(table, i);
+            int cnt = 0;
+            for (int j = 0; j < fields_len; j++) {
+                int num = atoi(wArgs.conditions[j]);
+                if (!strncmp(wArgs.fields[j], "id1", 3)) {
+                    if (!strncmp(wArgs.operators[j], "=", 1)) {
+                        if (like->id1 == num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "!=", 2)) {
+                        if (like->id1 != num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], ">", 1)) {
+                        if (like->id1 > num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "<", 1)) {
+                        if (like->id1 < num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], ">=", 2)) {
+                        if (like->id1 >= num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "<=", 2)) {
+                        if (like->id1 <= num) cnt++;
+                    } 
+                } else if (!strncmp(wArgs.fields[j], "id2", 3)) {
+                    if (!strncmp(wArgs.operators[j], "=", 1)) {
+                        if (like->id2 == num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "!=", 2)) {
+                        if (like->id2 != num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], ">", 1)) {
+                        if (like->id2 > num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "<", 1)) {
+                        if (like->id2 < num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], ">=", 2)) {
+                        if (like->id2 >= num) cnt++;
+                    } else if (!strncmp(wArgs.operators[j], "<=", 2)) {
+                        if (like->id2 <= num) cnt++;
+                    } 
+                }
+            }
+            if (wArgs.A == 1) {
+                if (cnt == fields_len) {
+                    int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                    if (idxList) {
+                        memcpy(buf, idxList, sizeof(int)*listLen);
+                        free(idxList);
+                    }
+                    idxList = buf;
+                    idxList[listLen] = i;
+                    listLen++;
+                }
+            } else {
+                if (cnt >= 1) {
+                    int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                    if (idxList) {
+                        memcpy(buf, idxList, sizeof(int)*listLen);
+                        free(idxList);
+                    }
+                    idxList = buf;
+                    idxList[listLen] = i;
+                    listLen++;
+                }
+            }
+        }
+    } else {
+        int *buf = (int *)malloc(sizeof(int)*table->user_len);
+        listLen = table->user_len;
+        idxList = buf;
+        for (int i = 0; i < table->user_len; i++) {
+            idxList[i] = i;
+        }
+    }
+    p.idxList = idxList;
+    p.listLen = listLen;
 
-
+    return p;
+}
 Pair_t where_users(Table_t *table, Command_t *cmd) {
     WhereArgs_t wArgs = cmd->whe_args;
     int fields_len = wArgs.fields_len;
@@ -153,7 +263,7 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
     int listLen = 0;
     Pair_t p;
     if (fields_len >= 1) {
-        for (int i = 0, j, cnt; i < table->len; i++) {
+        for (int i = 0, j, cnt; i < table->user_len; i++) {
             User_t *user = get_User(table, i);
             cnt = 0;
             for (j = 0; j < fields_len; j++) {
@@ -229,10 +339,10 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
             }
         }
     } else {
-        int *buf = (int *)malloc(sizeof(int)*table->len);
-        listLen = table->len;
+        int *buf = (int *)malloc(sizeof(int)*table->user_len);
+        listLen = table->user_len;
         idxList = buf;
-        for (int i = 0; i < table->len; i++) {
+        for (int i = 0; i < table->user_len; i++) {
             idxList[i] = i;
         }
     }
@@ -268,7 +378,7 @@ void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
 
 void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     Table_t *newTable = new_Table(NULL);
-    for (int i = 0, cnt = 0; i < table->len; i++) {
+    for (int i = 0, cnt = 0; i < table->user_len; i++) {
         cnt = 0;
         for (int j = 0; j < idxListLen; j++) {
             if (i == idxList[j]) cnt = 1; 
@@ -278,8 +388,8 @@ void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
         }
     }
     
-    table->len = newTable->len;
-    for (int i = 0; i < table->len; i++) {
+    table->user_len = newTable->user_len;
+    for (int i = 0; i < table->user_len; i++) {
         table->users[i].id = newTable->users[i].id;
         memcpy(table->users[i].name, newTable->users[i].name, sizeof(newTable->users[i].name));
         memcpy(table->users[i].email, newTable->users[i].email, sizeof(newTable->users[i].email));
@@ -342,7 +452,7 @@ int handle_update_cmd(Table_t *table, Command_t *cmd) {
     update_state_handler(cmd, 1);
     Pair_t p = where_users(table, cmd);
     updater(table, p.idxList, p.listLen, cmd);
-    return table->len;
+    return table->user_len;
 }
 
 int handle_delete_cmd(Table_t *table, Command_t *cmd) {
@@ -350,7 +460,7 @@ int handle_delete_cmd(Table_t *table, Command_t *cmd) {
     delete_state_handler(cmd, 1);
     Pair_t p = where_users(table, cmd);
     deleter(table, p.idxList, p.listLen, cmd);
-    return table->len;
+    return table->user_len;
 }
 
 int handle_insert_cmd(Table_t *table, Command_t *cmd) {
@@ -366,17 +476,31 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
         }
     } else if (!strncmp(cmd->args[2], "like", 4)) {
         Like_t *like = command_to_Like(cmd);
+        if (like) {
+            ret = add_Like(table, like);
+            if (ret > 0) {
+                cmd->type = INSERT_CMD;
+            }
+        }
     }
-    
+    return ret;
 }
 
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(cmd, 1);
-    Pair_t p = where_users(table, cmd);
-    print_users(table, p.idxList, p.listLen, cmd);
-    print_aggre(table, p.idxList, p.listLen, cmd);
-    return table->len;
+    if (!strncmp(cmd->table, "user", 4)) {
+        Pair_t p = where_users(table, cmd);
+        print_users(table, p.idxList, p.listLen, cmd);
+        print_aggre(table, p.idxList, p.listLen, cmd);
+        return table->user_len;
+    } else if (!strncmp(cmd->table, "like", 4)) {
+        Pair_t p = where_likes(table, cmd);
+        print_likes(table, p.idxList, p.listLen, cmd);
+        return table->like_len;
+    }
+    return -1;
+    
 }
 ///
 /// Show the help messages

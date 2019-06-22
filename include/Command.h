@@ -52,6 +52,7 @@ typedef struct AggreArgs {
 typedef struct Command {
     unsigned char type;
     char **args;
+    char *table;
     size_t args_len;
     size_t args_cap;
     SelectArgs_t sel_args;

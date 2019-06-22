@@ -5,7 +5,8 @@
 #include "SelectState.h"
 
 void update_state_handler(Command_t *cmd, size_t arg_idx) {
-    if (!strncmp(cmd->args[arg_idx], "user", 5) && !strncmp(cmd->args[arg_idx+1], "set", 3)) {
+    if (!strncmp(cmd->args[arg_idx], "user", 4) && !strncmp(cmd->args[arg_idx+1], "set", 3)) {
+        cmd->table = "user";
         arg_idx += 2;
         cmd->up_args.fields = cmd->args[arg_idx];
         arg_idx += 2;
@@ -24,7 +25,8 @@ void update_state_handler(Command_t *cmd, size_t arg_idx) {
     }
 }
 void delete_state_handler(Command_t *cmd, size_t arg_idx) {
-    if (!strncmp(cmd->args[arg_idx], "from", 4) && !strncmp(cmd->args[arg_idx+1], "", 5)) {
+    if (!strncmp(cmd->args[arg_idx], "from", 4) && !strncmp(cmd->args[arg_idx+1], "user", 4)) {
+        cmd->table = "user";
         arg_idx+=2;
         if (arg_idx < cmd->args_len) {
             if (!strncmp(cmd->args[arg_idx], "where", 5)) {
@@ -105,11 +107,27 @@ void where_state_handler(Command_t *cmd, size_t arg_idx) {
 }
 void table_state_handler(Command_t *cmd, size_t arg_idx) {
     if (arg_idx < cmd->args_len
-            && !strncmp(cmd->args[arg_idx], "table", 5)) {
-
+            && !strncmp(cmd->args[arg_idx], "user", 4)) {
         arg_idx++;
+        cmd->table = "user";
         if (arg_idx == cmd->args_len) {
-
+            return;
+        } else if (!strncmp(cmd->args[arg_idx], "where", 5)) {
+            where_state_handler(cmd, arg_idx+1);
+            return;
+        } else if (!strncmp(cmd->args[arg_idx], "offset", 6)) {
+            offset_state_handler(cmd, arg_idx+1);
+            return;
+        } else if (!strncmp(cmd->args[arg_idx], "limit", 5)) {
+            // printf("1\n")
+            limit_state_handler(cmd, arg_idx+1);
+            return;
+        } 
+    } else if (arg_idx < cmd->args_len
+            && !strncmp(cmd->args[arg_idx], "like", 4)) {
+        arg_idx++;
+            cmd->table = "like";
+        if (arg_idx == cmd->args_len) {
             return;
         } else if (!strncmp(cmd->args[arg_idx], "where", 5)) {
             where_state_handler(cmd, arg_idx+1);

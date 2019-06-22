@@ -69,9 +69,32 @@ execution command.
     ├─ include/           Header files
     ├─ src/               Source files
     │  ├─ shell.c         Entry point, which contains main()
-    │  └─ Util.c          Some utility functions
+    │  ├─ Util.c          Some utility functions
+    │  ├─ Table.c
+    │  ├─ SelectState.c   
+    │  ├─ User.c
+    │  ├─ Like.c
+    │  ├─ Util.c
+    │  ├─
     ├─ test/              Unit tests & system tests
     │  ├─ include/        Test header files
     │  ├─ system/         System tests
     │  └─ *.c             Unit tests source file
     └─ Makefile           Makefile for make
+
+
+## Done 
+1. update user set (SelectState.c - update_state_handler)
+2. delete from user (SelectState.c - delete_state_handler)
+3. archive table (Table.c - archive_like_table / archive_user_table)
+4. insert user and like (Table.c - add_Like / add_User)
+5. select user and like including where statement(Util.c - where_likes / print_likes / print_like) No aggregation yet
+6. update testcases to newest version and passes all excluding join and string bonus
+
+## On doing
+1. load table (Table.c - load_like_table / load_user_table)
+
+
+## Todo
+1. Join
+2. Debug

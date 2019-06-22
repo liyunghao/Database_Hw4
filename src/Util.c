@@ -498,7 +498,7 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
     } else if (!strncmp(cmd->table, "like", 4)) {
         Pair_t p = where_likes(table, cmd);
         print_likes(table, p.idxList, p.listLen, cmd);
-        printf("likeeee\n");
+        //printf("likeeee\n");
         return table->like_len;
     }
     return -1;

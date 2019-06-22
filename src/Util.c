@@ -398,8 +398,8 @@ void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
 }
 void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
     if (!strncmp(cmd->args[0], ".exit", 5)) {
-        archive_user_table(table);
-        archive_like_table(table);
+        archive_table(table);
+        //archive_like_table(table);
         exit(0);
     } else if (!strncmp(cmd->args[0], ".output", 7)) {
         if (cmd->args_len == 2) {
@@ -419,7 +419,6 @@ void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
     } else if (!strncmp(cmd->args[0], ".load", 5)) {
         if (cmd->args_len == 2) {
             load_table(table, cmd->args[1]);
-            
         }
     } else if (!strncmp(cmd->args[0], ".help", 5)) {
         print_help_msg();

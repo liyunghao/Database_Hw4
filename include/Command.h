@@ -22,6 +22,12 @@ typedef struct {
 
 extern CMD_t cmd_list[];
 
+typedef struct JoinArgs {
+    char *field1;
+    char *field2;
+    char *operators;
+} JoinArgs_t;
+
 typedef struct SelectArgs {
     char **fields;
     size_t fields_len;
@@ -34,8 +40,7 @@ typedef struct WhereArgs {
     size_t fields_len;
     char **operators;
     char **conditions;
-    int A;
-    int B;
+    int and;
 } WhereArgs_t;
 
 typedef struct UpdateArgs {
@@ -59,6 +64,7 @@ typedef struct Command {
     WhereArgs_t whe_args;
     UpdateArgs_t up_args;
     AggreArgs_t aggre_args;
+    JoinArgs_t join_args;
 } Command_t;
 
 Command_t* new_Command();

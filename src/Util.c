@@ -220,7 +220,7 @@ Pair_t where_likes(Table_t *table, Command_t *cmd) {
                     } 
                 }
             }
-            if (wArgs.A == 1) {
+            if (wArgs.and == 1) {
                 if (cnt == fields_len) {
                     int *buf = (int *)malloc(sizeof(int)*(listLen+1));
                     if (idxList) {
@@ -315,7 +315,7 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
                     }
                 }
             }
-            if (wArgs.A == 1) {
+            if (wArgs.and == 1) {
                 if (cnt == fields_len) {
                     int *buf = (int *)malloc(sizeof(int)*(listLen+1));
                     if (idxList) {
@@ -353,6 +353,26 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
     return p;
     
 }
+
+// Tuple_t where_join(Table_t *table, Command_t *cmd, Pair_t p) {
+//     WhereArgs_t wArgs = cmd->whe_args;
+//     JoinArgs_t jArgs = cmd->join_args;
+//     int fields_len = wArgs.fields_len;
+//     int *idxList1 = NULL, *idxList2 = NULL;
+//     int listLen = 0;
+//     for (int idx = 0; idx < p.listLen; idx++) {
+//         User_t *user = get_User(table, p.idxList[idx]);
+//         for (int i = 0; i < table->like_len; i++) {
+//             int choose = 0;
+//             Like_t *like = get_Like(table, i);
+//             if (!strncmp(jArgs.field2, "id1", 3)) {
+                
+//             } else if (!strncmp(jArgs.field2, "id2", 3)){
+
+//             }
+//         }
+//     }
+// }
 
 void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     UpdateArgs_t uArgs = cmd->up_args;
@@ -398,6 +418,7 @@ void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
         table->users[i].age = newTable->users[i].age;
     }
 }
+
 void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
     if (!strncmp(cmd->args[0], ".exit", 5)) {
         archive_table(table);
@@ -501,6 +522,11 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
         //printf("likeeee\n");
         return table->like_len;
     }
+    //  else if (!strncmp(cmd->table, "join", 4)) {
+    //     Pair_t p = where_users(table, cmd);
+    //     Tuple_t t = where_join(table, cmd, p);
+    //     print_join()
+    // }
     return -1;
     
 }

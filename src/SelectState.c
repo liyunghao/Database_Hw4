@@ -41,19 +41,7 @@ void delete_state_handler(Command_t *cmd, size_t arg_idx) {
     }
 }
 void field_state_handler(Command_t *cmd, size_t arg_idx) {
-    cmd->sel_args.fields = NULL;
-    cmd->sel_args.fields_len = 0;
-    cmd->sel_args.limit = -1;
-    cmd->sel_args.offset = -1;
-    cmd->whe_args.fields = NULL;
-    cmd->whe_args.fields_len = 0;
-    cmd->whe_args.operators = NULL;
-    cmd->whe_args.conditions  = NULL;
-    cmd->whe_args.A = 0;
-    cmd->whe_args.B = 0;
-    cmd->aggre_args.fields = NULL;
-    cmd->aggre_args.type = NULL;
-    cmd->aggre_args.fields_len = 0;
+    
     while(arg_idx < cmd->args_len) {
         // printf("1\n");
         if (!strncmp(cmd->args[arg_idx], "*", 1)) {
@@ -87,11 +75,10 @@ void where_state_handler(Command_t *cmd, size_t arg_idx) {
         if (arg_idx == cmd->args_len) {
             return;
         } else if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "and", 3)) {
-            cmd->whe_args.A = 1;
+            cmd->whe_args.and = 1;
             where_state_handler(cmd, arg_idx+1);
             return;
         } else if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "or", 2)) {
-            cmd->whe_args.B = 1;
             where_state_handler(cmd, arg_idx+1);
             return;
         } else if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "offset", 6)) {
@@ -105,12 +92,31 @@ void where_state_handler(Command_t *cmd, size_t arg_idx) {
     cmd->type = UNRECOG_CMD;
     return;
 }
+void join_state_handler(Command_t *cmd, size_t arg_idx) {
+    if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx++], "like", 4)) {
+        if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx++], "on", 2)) {
+            if (cmd->args_len - arg_idx > 2) {
+                memcpy(cmd->join_args.field1, cmd->args[arg_idx++], sizeof(char*));
+                memcpy(cmd->join_args.operators, cmd->args[arg_idx++], sizeof(char*));
+                memcpy(cmd->join_args.field2, cmd->args[arg_idx++], sizeof(char*));
+            }
+            if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "where", 5)) {
+                where_state_handler(cmd, arg_idx+1);
+            }
+        }
+    }
+    return;
+}
 void table_state_handler(Command_t *cmd, size_t arg_idx) {
     if (arg_idx < cmd->args_len
             && !strncmp(cmd->args[arg_idx], "user", 4)) {
         arg_idx++;
         cmd->table = "user";
         if (arg_idx == cmd->args_len) {
+            return;
+        } else if (!strncmp(cmd->args[arg_idx], "join", 4)) {
+            cmd->table = "join";
+            join_state_handler(cmd, arg_idx+1);
             return;
         } else if (!strncmp(cmd->args[arg_idx], "where", 5)) {
             where_state_handler(cmd, arg_idx+1);

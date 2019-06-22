@@ -10,6 +10,11 @@ typedef struct pair {
     int *idxList;
     int listLen;
 } Pair_t;
+typedef struct tuple {
+    int *idxList1;
+    int *idxList2;
+    int listLen;
+} Tuple_t;
 State_t* new_State();
 void print_prompt(State_t *state);
 void print_user(User_t *user, SelectArgs_t *sel_args);
@@ -20,6 +25,8 @@ void print_likes(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
 int parse_input(char *input, Command_t *cmd);
 void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state);
 Pair_t where_users(Table_t *table, Command_t *cmd);
+Pair_t where_likes(Table_t *table, Command_t *cmd);
+Tuple_t where_join(Table_t *table, Command_t *cmd, Pair_t p);
 void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd);
 void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd);
 int handle_query_cmd(Table_t *table, Command_t *cmd);

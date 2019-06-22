@@ -244,10 +244,10 @@ Pair_t where_likes(Table_t *table, Command_t *cmd) {
             }
         }
     } else {
-        int *buf = (int *)malloc(sizeof(int)*table->user_len);
-        listLen = table->user_len;
+        int *buf = (int *)malloc(sizeof(int)*table->like_len);
+        listLen = table->like_len;
         idxList = buf;
-        for (int i = 0; i < table->user_len; i++) {
+        for (int i = 0; i < table->like_len; i++) {
             idxList[i] = i;
         }
     }

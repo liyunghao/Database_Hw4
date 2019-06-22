@@ -24,6 +24,28 @@ Command_t* new_Command() {
     cmd->table = 0;
     cmd->args_len = 0;
     cmd->args_cap = 0;
+    // initialized sel_args
+    cmd->sel_args.fields = NULL;
+    cmd->sel_args.fields_len = 0;
+    cmd->sel_args.limit = -1;
+    cmd->sel_args.offset = -1;
+    // initialized where_args
+    cmd->whe_args.fields = NULL;
+    cmd->whe_args.fields_len = 0;
+    cmd->whe_args.operators = NULL;
+    cmd->whe_args.conditions  = NULL;
+    cmd->whe_args.and = 0;
+    // initialized aggre_args
+    cmd->aggre_args.fields = NULL;
+    cmd->aggre_args.type = NULL;
+    cmd->aggre_args.fields_len = 0;
+    // initialized update_args
+    cmd->up_args.fields = NULL;
+    cmd->up_args.dest = NULL;
+    // initialized join_args
+    cmd->join_args.field1 = NULL;
+    cmd->join_args.field2 = NULL;
+    cmd->join_args.operators = NULL;
     return cmd;
 }
 
@@ -56,7 +78,6 @@ int add_Arg(Command_t *cmd, const char *arg) {
         cmd->args_cap += 5;
     }
     cmd->args[cmd->args_len] = strdup(arg);
-    // printf("%s ", cmd->args[cmd->args_len]);
     cmd->args_len++;
     return 0;
 

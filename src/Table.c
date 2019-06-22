@@ -160,6 +160,7 @@ int archive_like_table(Table_t *table) {
 /// only if the ``file_name`` is NULL
 /// Return: the number of records in the db file
 ///
+/* 
 int load_user_table(Table_t *table, char *file_name) {
     size_t archived_len;
     struct stat st;
@@ -196,6 +197,7 @@ int load_user_table(Table_t *table, char *file_name) {
     }
     return table->user_len;
 }
+*/
 
 ///
 /// Loading the db file will overwrite the existed records in table,

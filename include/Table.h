@@ -25,7 +25,7 @@ int add_Like(Table_t *table, Like_t *like);
 int archive_user_table(Table_t *table);
 int archive_like_table(Table_t *table);
 int load_user_table(Table_t *table, char *file_name);
-int load_user_table(Table_t *table, char *file_name);
+//int load_user_table(Table_t *table, char *file_name);
 User_t* get_User(Table_t *table, size_t idx);
 Like_t* get_Like(Table_t *table, size_t idx);
 

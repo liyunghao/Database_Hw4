@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "memory.h"
 #include "Command.h"
 #include "SelectState.h"
 
@@ -57,6 +58,7 @@ void field_state_handler(Command_t *cmd, size_t arg_idx) {
         } else if (!strncmp(cmd->args[arg_idx], "age", 3)) {
             add_select_field(cmd, cmd->args[arg_idx]);
         } else if (!strncmp(cmd->args[arg_idx], "from", 4)) {
+            //printf("testtt!\n");
             table_state_handler(cmd, arg_idx+1);
             return;
         } else {
@@ -93,12 +95,25 @@ void where_state_handler(Command_t *cmd, size_t arg_idx) {
     return;
 }
 void join_state_handler(Command_t *cmd, size_t arg_idx) {
+    
     if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx++], "like", 4)) {
+        
         if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx++], "on", 2)) {
+            
             if (cmd->args_len - arg_idx > 2) {
-                memcpy(cmd->join_args.field1, cmd->args[arg_idx++], sizeof(char*));
-                memcpy(cmd->join_args.operators, cmd->args[arg_idx++], sizeof(char*));
-                memcpy(cmd->join_args.field2, cmd->args[arg_idx++], sizeof(char*));
+                printf("testtt\n");
+                
+
+                // strcpy(cmd->join_args.field1, cmd->args[arg_idx++]);
+                // strcpy(cmd->join_args.operators, cmd->args[arg_idx++]);
+                // strcpy(cmd->join_args.field2, cmd->args[arg_idx++]);
+                
+                memcpy(cmd->join_args.field1, cmd->args[arg_idx++], sizeof(char*)); //id
+                memcpy(cmd->join_args.operators, cmd->args[arg_idx++], sizeof(char*)); // = 
+                memcpy(cmd->join_args.field2, cmd->args[arg_idx++], sizeof(char*)); //id1 or id2
+                
+
+                
             }
             if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "where", 5)) {
                 where_state_handler(cmd, arg_idx+1);

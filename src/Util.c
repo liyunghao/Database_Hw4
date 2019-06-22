@@ -354,25 +354,93 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
     
 }
 
-// Tuple_t where_join(Table_t *table, Command_t *cmd, Pair_t p) {
-//     WhereArgs_t wArgs = cmd->whe_args;
-//     JoinArgs_t jArgs = cmd->join_args;
-//     int fields_len = wArgs.fields_len;
-//     int *idxList1 = NULL, *idxList2 = NULL;
-//     int listLen = 0;
-//     for (int idx = 0; idx < p.listLen; idx++) {
-//         User_t *user = get_User(table, p.idxList[idx]);
-//         for (int i = 0; i < table->like_len; i++) {
-//             int choose = 0;
-//             Like_t *like = get_Like(table, i);
-//             if (!strncmp(jArgs.field2, "id1", 3)) {
-                
-//             } else if (!strncmp(jArgs.field2, "id2", 3)){
+Tuple_t where_join(Table_t *table, Command_t *cmd, Pair_t p) {
+    WhereArgs_t wArgs = cmd->whe_args;      //useless?
+    JoinArgs_t jArgs = cmd->join_args;
+    int fields_len = wArgs.fields_len;
+    int *idxList1 = NULL, *idxList2 = NULL;
+    int listLen = 0;
+    Tuple_t t;
+    if (fields_len >= 1){
+        //printf("jojojojojoj\n");
 
-//             }
-//         }
-//     }
-// }
+        for (int idx = 0; idx < p.listLen; idx++) {
+            User_t *user = get_User(table, p.idxList[idx]);
+            for (int i = 0; i < table->like_len; i++) {
+                int choose = 0;
+                Like_t *like = get_Like(table, i);
+                if (!strncmp(jArgs.field2, "id1", 3)) {
+                    if(user->id == like->id1)    choose++;     
+                } else if (!strncmp(jArgs.field2, "id2", 3)){
+                    if(user->id == like->id2)   choose++;
+                }
+
+                if (wArgs.and == 1) {
+                    if (choose == fields_len) {
+                        int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                        if (idxList1 || idxList2) {
+                            memcpy(buf, idxList1, sizeof(int)*listLen);
+                            memcpy(buf, idxList2, sizeof(int)*listLen);
+                            free(idxList1);
+                            free(idxList1);
+                        }
+                        idxList1 = buf;
+                        idxList2 = buf;
+                        idxList1[listLen] = idx;
+                        idxList2[listLen] = i;
+                        listLen++;
+                    }
+                } else {
+                    if (choose >= 1) {
+                        int *buf = (int *)malloc(sizeof(int)*(listLen+1));
+                        if (idxList1 || idxList2) {
+                            memcpy(buf, idxList1, sizeof(int)*listLen);
+                            memcpy(buf, idxList2, sizeof(int)*listLen);
+                            free(idxList1);
+                            free(idxList1);
+                        }
+                        idxList1 = buf;
+                        idxList2 = buf;
+                        idxList1[listLen] = idx;
+                        idxList2[listLen] = i;
+                        listLen++;
+                    }
+                }
+
+                
+            }
+            
+            
+        }
+    } else {        //沒where 只看join
+
+        printf("list len = %d\n", p.listLen);
+        for (int idx = 0; idx < p.listLen; idx++) {
+            User_t *user = get_User(table, p.idxList[idx]);
+            for (int i = 0; i < table->like_len; i++) {
+                int choose = 0;
+                Like_t *like = get_Like(table, i);
+                if (!strncmp(jArgs.field2, "id1", 3)) {
+                    if(user->id == like->id1)    choose++;     
+                } else if (!strncmp(jArgs.field2, "id2", 3)){
+                    if(user->id == like->id2)   choose++;
+                }
+                idxList1[listLen] = idx;
+                idxList2[listLen] = i;
+                listLen = choose;
+            }
+            
+            
+        }
+        printf("jiijijijij\n");
+    }
+    
+    t.idxList1 = idxList1;
+    t.idxList2 = idxList2;
+    t.listLen = listLen;
+
+    return t;
+}
 
 void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     UpdateArgs_t uArgs = cmd->up_args;
@@ -511,6 +579,9 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(cmd, 1);
+
+    printf("%s\n", cmd->table);
+
     if (!strncmp(cmd->table, "user", 4)) {
         Pair_t p = where_users(table, cmd);
         print_users(table, p.idxList, p.listLen, cmd);
@@ -519,14 +590,16 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
     } else if (!strncmp(cmd->table, "like", 4)) {
         Pair_t p = where_likes(table, cmd);
         print_likes(table, p.idxList, p.listLen, cmd);
-        //printf("likeeee\n");
+        
         return table->like_len;
+    } else if (!strncmp(cmd->table, "join", 4)) {
+        Pair_t p = where_users(table, cmd);
+        Tuple_t t = where_join(table, cmd, p);
+        //printf("ookokoko\n");
+        print_aggre(table, t.idxList1, t.listLen, cmd);     //not sure
+        //printf("%d\n", t.listLen);
+        //print_join(table, );
     }
-    //  else if (!strncmp(cmd->table, "join", 4)) {
-    //     Pair_t p = where_users(table, cmd);
-    //     Tuple_t t = where_join(table, cmd, p);
-    //     print_join()
-    // }
     return -1;
     
 }

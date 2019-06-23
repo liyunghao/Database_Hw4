@@ -101,7 +101,7 @@ def main():
 
     user_insert = insert_table(user_table, 'user',['id', 'name', 'email', 'age'])
     like_insert = insert_table(like_table, 'like',['id1', 'id2'])
-    
+   
     #---------------------------------------------------------------#
     # t1 -- select id, name from user offset <offset num> limit <limit num> 
     #---------------------------------------------------------------#
@@ -156,10 +156,10 @@ def main():
     answer = user_table.loc[(user_table['age']>=lower)&(user_table['age']<=upper),'age'].count()
 
     with open(answer_file_path, 'w') as f:
-        f.write('(%d)' % answer)
+        f.write('(%d)\n' % answer)
     
     #--------------------------------------------------------------------------------------------#
-    # t4 -- select count(*) from user join like on user.id = like.id1 where user.name = "{target_user}"
+    # t4 -- select count(*) from user join like on id = id1 where name = "{target_user}"
     #--------------------------------------------------------------------------------------------#  
     test_file_path = os.path.join(testcase_dir, 't4.txt')
     answer_file_path = os.path.join(answer_dir, 't4.txt')
@@ -178,10 +178,10 @@ def main():
         answer = answer.shape[0]
 
     with open(answer_file_path, 'w') as f:
-        f.write('(%d)' % answer)
+        f.write('(%d)\n' % answer)
     
     #--------------------------------------------------------------------------------------------#
-    # t5 -- select count(*) from user join like on user.id = like.id2 where age < {target_age}
+    # t5 -- select count(*) from user join like on id = id2 where age < {target_age}
     #--------------------------------------------------------------------------------------------#
     test_file_path = os.path.join(testcase_dir, 't5.txt')
     answer_file_path = os.path.join(answer_dir, 't5.txt')
@@ -195,7 +195,7 @@ def main():
     answer = answer[answer['age']<target_age].loc[:,'name'].count()
 
     with open(answer_file_path, 'w') as f:
-        f.write('(%d)' % answer)
+        f.write('(%d)\n' % answer)
 
 if __name__ == "__main__":
     main()

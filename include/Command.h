@@ -22,6 +22,12 @@ typedef struct {
 
 extern CMD_t cmd_list[];
 
+typedef struct JoinArgs {
+    char *field1;
+    char *field2;
+    char *operators;
+} JoinArgs_t;
+
 typedef struct SelectArgs {
     char **fields;
     size_t fields_len;

@@ -137,6 +137,7 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
         print_user(get_User(table, idxList[idx]), &(cmd->sel_args));
     }
 }
+
 void print_likes(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     size_t idx;
     int limit = cmd->sel_args.limit;
@@ -174,8 +175,8 @@ int parse_input(char *input, Command_t *cmd) {
 }
 
 ///
-/// Handle built-in commands
-/// Return: command type
+/// 
+/// Return: pair
 ///
 Pair_t where_likes(Table_t *table, Command_t *cmd) {
     WhereArgs_t wArgs = cmd->whe_args;
@@ -441,6 +442,7 @@ void deleter(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
         table->users[i].age = newTable->users[i].age;
     }
 }
+
 void handle_builtin_cmd(Table_t *table, Command_t *cmd, State_t *state) {
     if (!strncmp(cmd->args[0], ".exit", 5)) {
         archive_table(table);
@@ -542,6 +544,7 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
     } else if (!strncmp(cmd->table, "like", 4)) {
         Pair_t p = where_likes(table, cmd);
         print_likes(table, p.idxList, p.listLen, cmd);
+        
         return table->like_len;
     } else if (!strncmp(cmd->table, "join", 4)) {
         Pair_t p = where_users(table, cmd);

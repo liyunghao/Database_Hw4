@@ -42,7 +42,6 @@ void delete_state_handler(Command_t *cmd, size_t arg_idx) {
     }
 }
 void field_state_handler(Command_t *cmd, size_t arg_idx) {
-<<<<<<< HEAD
     cmd->sel_args.fields = NULL;
     cmd->sel_args.fields_len = 0;
     cmd->sel_args.limit = -1;
@@ -56,9 +55,6 @@ void field_state_handler(Command_t *cmd, size_t arg_idx) {
     cmd->aggre_args.type = NULL;
     cmd->aggre_args.fields_len = 0;
     cmd->join_args.field = NULL;
-=======
-    
->>>>>>> ff790ddab0eb1c35250b4a970be2e6a835e62abc
     while(arg_idx < cmd->args_len) {
         // printf("1\n");
         if (!strncmp(cmd->args[arg_idx], "*", 1)) {
@@ -125,15 +121,12 @@ void join_state_handler(Command_t *cmd, size_t arg_idx) {
             if (arg_idx < cmd->args_len && !strncmp(cmd->args[arg_idx], "where", 5)) {
                 where_state_handler(cmd, arg_idx+1);
             }
-<<<<<<< HEAD
             // printf("%s\n", cmd->join_args.field);
             // for (int i = 0; i < cmd->whe_args.fields_len; i++) {
             //     printf("%s %s %s\n", cmd->whe_args.fields[i], cmd->whe_args.operators[i], cmd->whe_args.conditions[i]);
             // }
             // printf("%d\n", cmd->sel_args.limit);
             // printf("%d\n", cmd->sel_args.offset);
-=======
->>>>>>> ff790ddab0eb1c35250b4a970be2e6a835e62abc
         }
     }
     return;

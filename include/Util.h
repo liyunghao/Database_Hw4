@@ -10,6 +10,11 @@ typedef struct pair {
     int *idxList;
     int listLen;
 } Pair_t;
+typedef struct tuple {
+    int *idxList1;
+    int *idxList2;
+    int listLen;
+} Tuple_t;
 State_t* new_State();
 void print_prompt(State_t *state);
 void print_user(User_t *user, SelectArgs_t *sel_args);

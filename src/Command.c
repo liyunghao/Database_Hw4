@@ -24,6 +24,7 @@ Command_t* new_Command() {
     cmd->table = 0;
     cmd->args_len = 0;
     cmd->args_cap = 0;
+    
     return cmd;
 }
 

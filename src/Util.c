@@ -126,7 +126,7 @@ void print_users(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd
     size_t idx;
     int limit = cmd->sel_args.limit;
     int offset = cmd->sel_args.offset;
-
+    // printf("%zu\n", idxListLen);
     if (offset == -1) {
         offset = 0;
     }
@@ -219,7 +219,7 @@ Pair_t where_likes(Table_t *table, Command_t *cmd) {
                     } 
                 }
             }
-            if (wArgs.A == 1) {
+            if (wArgs.and == 1) {
                 if (cnt == fields_len) {
                     int *buf = (int *)malloc(sizeof(int)*(listLen+1));
                     if (idxList) {
@@ -244,10 +244,10 @@ Pair_t where_likes(Table_t *table, Command_t *cmd) {
             }
         }
     } else {
-        int *buf = (int *)malloc(sizeof(int)*table->user_len);
-        listLen = table->user_len;
+        int *buf = (int *)malloc(sizeof(int)*table->like_len);
+        listLen = table->like_len;
         idxList = buf;
-        for (int i = 0; i < table->user_len; i++) {
+        for (int i = 0; i < table->like_len; i++) {
             idxList[i] = i;
         }
     }
@@ -314,7 +314,7 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
                     }
                 }
             }
-            if (wArgs.A == 1) {
+            if (wArgs.and == 1) {
                 if (cnt == fields_len) {
                     int *buf = (int *)malloc(sizeof(int)*(listLen+1));
                     if (idxList) {
@@ -348,9 +348,54 @@ Pair_t where_users(Table_t *table, Command_t *cmd) {
     }
     p.idxList = idxList;
     p.listLen = listLen;
-
+    // printf("%d\n", listLen);
     return p;
     
+}
+Tuple_t where_join(Table_t *table, Command_t *cmd, Pair_t p) {
+    JoinArgs_t jArgs = cmd->join_args;
+    int *idxList1 = NULL, *idxList2 = NULL;
+    int listLen = 0;
+    Tuple_t t;
+
+    for (int idx = 0; idx < p.listLen; idx++) {
+        User_t *user = get_User(table, p.idxList[idx]);
+        for (int i = 0; i < table->like_len; i++) {
+            int choose = 0;
+            Like_t *like = get_Like(table, i);
+            // printf("%d, %d\n", like->id1, like->id2);
+            if (!strncmp(jArgs.field, "id1", 3)) {
+                if(user->id == like->id1)    choose = 1;     
+            } else if (!strncmp(jArgs.field, "id2", 3)){
+                if(user->id == like->id2)   choose = 1;
+            }
+            if (choose) {
+                int *buf1 = (int *)malloc(sizeof(int)*(listLen+1));
+                int *buf2 = (int *)malloc(sizeof(int)*(listLen+1));
+                if (idxList1) {
+                    memcpy(buf1, idxList1, sizeof(int)*listLen);
+                    free(idxList1);
+                   
+                }
+                if (idxList2) {
+                    memcpy(buf2, idxList2, sizeof(int)*listLen);
+                    free(idxList2);
+                }
+                idxList1 = buf1;
+                idxList2 = buf2;
+                idxList1[listLen] = idx;
+                idxList2[listLen] = i;
+                listLen++;
+            }
+        }
+    }
+    
+    
+    t.idxList1 = idxList1;
+    t.idxList2 = idxList2;
+    t.listLen = listLen;
+    printf("(%d)\n", listLen);
+    return t;
 }
 void updater(Table_t *table, int *idxList, size_t idxListLen, Command_t *cmd) {
     UpdateArgs_t uArgs = cmd->up_args;
@@ -488,6 +533,7 @@ int handle_insert_cmd(Table_t *table, Command_t *cmd) {
 int handle_select_cmd(Table_t *table, Command_t *cmd) {
     cmd->type = SELECT_CMD;
     field_state_handler(cmd, 1);
+    // printf("%s\n", cmd->table);
     if (!strncmp(cmd->table, "user", 4)) {
         Pair_t p = where_users(table, cmd);
         print_users(table, p.idxList, p.listLen, cmd);
@@ -497,6 +543,11 @@ int handle_select_cmd(Table_t *table, Command_t *cmd) {
         Pair_t p = where_likes(table, cmd);
         print_likes(table, p.idxList, p.listLen, cmd);
         return table->like_len;
+    } else if (!strncmp(cmd->table, "join", 4)) {
+        Pair_t p = where_users(table, cmd);
+        print_users(table, p.idxList, p.listLen, cmd);
+        Tuple_t t = where_join(table, cmd, p); 
+
     }
     return -1;
     

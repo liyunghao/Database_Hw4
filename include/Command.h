@@ -34,8 +34,7 @@ typedef struct WhereArgs {
     size_t fields_len;
     char **operators;
     char **conditions;
-    int A;
-    int B;
+    int and;
 } WhereArgs_t;
 
 typedef struct UpdateArgs {
@@ -49,6 +48,9 @@ typedef struct AggreArgs {
     size_t fields_len;
 
 } AggreArgs_t;
+typedef struct JoinArgs {
+    char *field;
+} JoinArgs_t;
 typedef struct Command {
     unsigned char type;
     char **args;
@@ -59,6 +61,7 @@ typedef struct Command {
     WhereArgs_t whe_args;
     UpdateArgs_t up_args;
     AggreArgs_t aggre_args;
+    JoinArgs_t join_args;
 } Command_t;
 
 Command_t* new_Command();
